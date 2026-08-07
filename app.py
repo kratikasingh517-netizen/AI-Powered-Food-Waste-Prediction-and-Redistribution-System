@@ -1,11 +1,33 @@
 import streamlit as st
+import pickle
+import numpy as np
 
-st.title("🌾 Food Waste AI System")
+# Load ML model
+model = pickle.load(open("food_waste_model.pkl", "rb"))
 
-center = st.text_input("Enter Center ID")
-meal = st.text_input("Enter Meal ID")
+st.title("🌾 AI-Powered Food Waste Prediction & Redistribution System")
 
-if st.button("Predict"):
-    st.write("📊 Predicted Waste: 120 kg")
-    st.write("🤝 NGO Suggestions: Feeding India, Red Cross")
-    st.write("⚡ Recommendation: Distribute within 4–6 hours")
+st.write(
+    "Predict food waste generation and get redistribution recommendations using AI."
+)
+
+center = st.number_input("Enter Center ID")
+meal = st.number_input("Enter Meal ID")
+people = st.number_input("Expected Number of People")
+quantity = st.number_input("Food Quantity Prepared (kg)")
+
+if st.button("Predict Waste"):
+
+    input_data = np.array([[center, meal, people, quantity]])
+
+    prediction = model.predict(input_data)
+
+    waste = round(prediction[0], 2)
+
+    st.success(f"📊 Predicted Food Waste: {waste} kg")
+
+    if waste > 50:
+        st.info("🤝 NGO Suggestions: Feeding India, Red Cross")
+        st.warning("⚡ Recommendation: Redistribute within 4–6 hours")
+    else:
+        st.success("✅ Waste level is manageable")
